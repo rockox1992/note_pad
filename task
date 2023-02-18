@@ -1,0 +1,295 @@
+import csv
+import sys
+from datetime import datetime
+
+
+def a():  #дозапись
+    with open('task.csv', 'a', newline='', encoding='utf-8') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=';', quoting=csv.QUOTE_NONE)
+
+        spamwriter.writerow([input('Введите название файла: '),
+                            f'{datetime.now()}', input('Введите текст: ')])
+        #print('Заметка сохранена.')
+
+
+def a_s(s):  # перезапись
+    with open('task.csv', 'a', newline='', encoding='utf-8') as csvfile:
+       spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_NONE)
+       spamwriter.writerow(s)
+       #print('Заметка сохранена.')
+
+
+def w_s():  # перезапись
+    with open('task.csv', 'w', newline='', encoding='utf-8')as csvfile:
+        csvfile.close()
+
+
+def read():  # чтение всего
+    with open('task.csv', newline='', encoding='utf-8') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',')
+        for row in spamreader:
+            print(row)
+
+
+def serch(ser):  # поиск нужной заметки
+    with open('task.csv', newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=';')
+        for row in spamreader:
+            if ser == row[0]:
+                return row[0:3:2]
+        else:
+            print("Файла не существует!")
+
+
+def csv_list():  # csv в list
+    with open('task.csv', newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=';')
+        task_list = list(spamreader)
+        return task_list
+
+
+def edit():  # редактировать список
+    editor = input('Введите команду: \n'
+          'ap - добавить в конец заметки, \n'
+          'ins - вставить внутри текста, \n'
+          'rem - удалить элементы из списка, \n'
+          'cle - удалить заметку, \n')
+
+    if editor == 'ap':
+        ap = serch(input('Укажите название заметки: '))
+        if ap:
+            list_c = csv_list()
+            for s_row in list_c:
+                if s_row[0] == ap[0]:
+                    l_row_1 = ''.join([s_row[2], input('Введите текст: ')])
+                    list_c.remove(s_row)
+                    s_row.remove(s_row[2])
+                    s_row.remove(s_row[1])
+                    s_row.remove(s_row[0])
+                    s_row.append(ap[0])
+                    s_row.append(f'{datetime.now()}')
+                    s_row.append(l_row_1)
+                    list_c.append(s_row)
+                    break
+                else:
+                    print("err")
+                    break
+            w_s()
+            for aa in list_c:
+                b = ';'.join(aa)
+                c = [str(b)]
+                a_s(c)
+        else:
+            return edit()
+
+    elif editor == 'ins':
+        ap = serch(input('Укажите название заметки: '))
+        if ap:
+            list_c = csv_list()
+            for s_row in list_c:
+                if s_row[0] == ap[0]:
+                    print(s_row[2])
+                    word = input('Укажите слово после которого вставить: ')
+                    ind = s_row[2].index(word)
+                    list_row = list(s_row[2])
+                    list_row.insert((ind + 1), "||")
+                    print(''.join(list_row))
+                    cur = input("Вы хотите сдвинуть курсор ||(y, n) ?: ").lower()
+                    if cur == 'y':
+                        while cur != 'n':
+                            list_row.pop(ind + 1)
+                            r_ind = int(input('Укажите на какое количество символов сдвинуть, "-2" влево, "+2" вправо: '))
+                            list_row.insert((ind + (r_ind + 1)), "||")
+                            print(''.join(list_row))
+                            list_row.pop(ind + (r_ind + 1))
+                            cur = input('Вы хотите повторить(y, n)?:  ').lower()
+
+                        text = input("введите текст: ")
+                        list_row.insert((ind + (r_ind + 1)), text)
+                        list_c.remove(s_row)
+                        s_row.remove(s_row[2])
+                        s_row.remove(s_row[1])
+                        s_row.remove(s_row[0])
+                        s_row.append(ap[0])
+                        s_row.append(f'{datetime.now()}')
+                        s_row.append(''.join(list_row))
+                        list_c.append(s_row)
+                    elif cur == 'n':
+                        list_row.pop(ind + 1)
+                        text = input("введите текст: ")
+                        list_row.insert((ind + 1), text)
+                        list_c.remove(s_row)
+                        s_row.remove(s_row[2])
+                        s_row.remove(s_row[1])
+                        s_row.remove(s_row[0])
+                        s_row.append(ap[0])
+                        s_row.append(f'{datetime.now()}')
+                        s_row.append(''.join(list_row))
+                        list_c.append(s_row)
+                    break
+            w_s()
+            for aa in list_c:
+                b = ';'.join(aa)
+                c = [str(b)]
+                a_s(c)
+        else:
+            return edit()
+
+    elif editor == 'rem':
+        ap = serch(input('Укажите название заметки: '))
+        if ap:
+            list_c = csv_list()
+
+            for s_row in list_c:
+
+                if s_row[0] == ap[0]:
+                    print(s_row[2])
+                    word_1 = input('Укажите слово начала курсора: ')
+                    ind_1 = s_row[2].index(word_1)
+                    list_row = list(s_row[2])
+                    list_row.insert(ind_1, "||")
+                    print(''.join(list_row))
+                    cur = input("Вы хотите сдвинуть курсор ||(y, n) ?: ").lower()
+
+                    if cur == 'y':
+                        while cur != 'n':
+                            list_row.pop(ind_1)
+                            r_ind = int(input('Укажите на какое количество символов сдвинуть, "-2" влево, "+2" вправо: '))
+                            list_row.insert((ind_1 + r_ind), "||")
+                            print(''.join(list_row))
+                            list_row.pop(ind_1 + (r_ind))
+                            cur = input('Вы хотите повторить(y, n)?:  ').lower()
+                    word_2 = input('Укажите слово конца курсора: ')
+                    ind_2 = list_row.index(word_2)
+                    list_row.insert(ind_2 + 1, "||")
+                    print(''.join(list_row))
+                    cur_2 = input("Вы хотите сдвинуть курсор ||(y, n) ?: ").lower()
+
+                    if cur_2 == 'y':
+
+                        while cur_2 != 'n':
+                            list_row.pop(ind_2 + 1)
+                            r_ind = int(
+                                input('Укажите на какое количество символов сдвинуть, "-2" влево, "+2" вправо: '))
+                            list_row.insert((ind_2 + (r_ind + 1)), "||")
+                            list_row.pop(ind_2 + (r_ind + 1))
+                            print(''.join(list_row))
+                            cur_2 = input('Вы хотите повторить(y, n)?:  ').lower()
+
+            print(''.join(list_row))
+            s_i = ''.join(list_row).index("||")
+            st_i = ''.join(list_row).rindex("||")
+            del list_row[s_i:st_i]
+            new_l = ''.join(list_row)
+
+            for x in list_c:
+                if x[0] == ap[0]:
+                    list_c.remove(x)
+                    x.remove(x[2])
+                    x.remove(x[1])
+                    x.remove(x[0])
+                    x.append(ap[0])
+                    x.append(f'{datetime.now()}')
+                    x.append(new_l)
+                    list_c.append(x)
+                    break
+        w_s()
+        for aa in list_c:
+            b = ';'.join(aa)
+            c = [str(b)]
+            a_s(c)
+
+    elif editor == 'cle':
+        ap = serch(input('Укажите название заметки: '))
+        if ap:
+            list_c = csv_list()
+            for s_row in list_c:
+                if s_row[0] == ap[0]:
+                    list_c.remove(s_row)
+                    s_row.remove(s_row[2])
+                    s_row.remove(s_row[1])
+                    s_row.remove(s_row[0])
+                else:
+                    print("err")
+                    break
+            w_s()
+            for aa in list_c:
+                b = ';'.join(aa)
+                c = [str(b)]
+                a_s(c)
+        else:
+            return edit()
+
+    else:
+        print('Вы ввели не верную команду.')
+        return edit()
+
+
+def sample(s, end):
+    s_time = datetime.strptime(s, "%Y/%m/%d").date()
+    end_time = datetime.strptime(end, "%Y/%m/%d").date()
+    list_c = csv_list()
+    for time_l in list_c:
+        xxx = datetime.strptime(time_l[1], '%Y-%m-%d %H:%M:%S.%f').date()
+        if s_time <= xxx <= end_time:
+            print(time_l)
+        else:
+            print("Вы ввели дату некоректно")
+            return sample(input("Начало периода(2023/02/17): "), input("Конец периода(2023/02/17): "))
+
+
+def start():
+    print("Start")
+    st = input("Выберите действие:\n"
+                  "read - Прочитать все заметки \n"
+                  "serch - Найти заметку по названию и прочитать ее \n"
+                  "edit - Изменить заметку \n"
+                  "add - Добавить заметку \n"
+                  "sample - Выборка по дате \n"
+                "del - удалить все заметки \n"
+               "end - выход \n")
+
+    if st == "read":
+        return read(), start()
+    elif st == "serch":
+        return print(serch(input("Укажите название заметки: "))), start()
+    elif st == "edit":
+        return edit(), start()
+    elif st == "add":
+        return a(), start()
+    elif st == "sample":
+        return sample(input("Начало периода(2023/02/17): "), input("Конец периода(2023/02/17): ")), start()
+    elif st == "del":
+        return w_s(), start()
+    elif st == "end":
+        return sys.exit()
+    else:
+        return start()
+
+
+
+start()
+
+
+
+
+
+
+
+# w_s()
+# edit()
+# csv_list()
+
+# a()
+# a()
+# a()
+
+# sample("2023/02/17", "2023/02/17")
+# read()
+# print(serch("t2"))
+
+#Необходимо написать проект, содержащий функционал работы с заметками.
+#Программа должна уметь создавать заметку, сохранять её, читать список
+#заметок, редактировать заметку, удалять заметку
+#При чтении списка заметок реализовать фильтрацию по дате.
+
